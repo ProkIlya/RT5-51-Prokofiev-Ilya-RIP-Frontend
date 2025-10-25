@@ -1,0 +1,93 @@
+/* ScenarioDetailPage.css */
+.scenario-detail-container {
+  /* Убрали фиксированный паддинг, так как используем общий Navbar */
+}
+
+.scenario-detail-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 50vh;
+}
+
+/* Основной контент страницы деталей */
+.scenario-detail {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.scenario-detail img {
+  width: 100%;
+  max-height: 400px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.scenario-detail h1 {
+  font-family: 'Universal Sans Display', Arial, sans-serif;
+  font-size: 36px;
+  color: #171A20;
+  margin-bottom: 15px;
+}
+
+.scenario-detail .description {
+  font-family: 'Universal Sans Text', Arial, sans-serif;
+  font-size: 17px;
+  color: #5C5E62;
+  margin-bottom: 30px;
+}
+
+/* Параметры сценария */
+.parameters {
+  text-align: left;
+  margin-bottom: 30px;
+}
+
+.parameter {
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e2e3e3;
+}
+
+.parameter:last-child {
+  border-bottom: none;
+}
+
+.parameter .name {
+  font-family: 'Universal Sans Display', Arial, sans-serif;
+  font-size: 17px;
+  color: #171A20;
+  font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.parameter .value {
+  font-family: 'Universal Sans Text', Arial, sans-serif;
+  font-size: 17px;
+  color: #393C41;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.parameter .description {
+  font-family: 'Universal Sans Text', Arial, sans-serif;
+  font-size: 14px;
+  color: #5C5E62;
+  margin: 0;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+  .scenario-detail {
+    padding: 15px;
+  }
+  
+  .scenario-detail h1 {
+    font-size: 28px;
+  }
+}
