@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { FC } from 'react';
-import { Container, Form, Spinner, Alert } from 'react-bootstrap';
+import { Container, Form, Spinner, Alert, Button, Row, Col } from 'react-bootstrap';
 import { ScenarioCard } from '../components/ScenarioCard';
 import { BreadCrumbs } from '../components/BreadCrumbs';
 import { CartIcon } from '../components/CartIcon';
@@ -13,18 +13,17 @@ export const ScenariosPage: FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
   const [cartCount, setCartCount] = useState(0);
-
-  useEffect(() => {
-    loadScenarios();
-    loadCart();
-  }, [searchQuery]);
 
   const loadScenarios = async () => {
     setLoading(true);
     setError('');
     try {
-      const data = await api.getScenarios({ search: searchQuery });
+      const data = await api.getScenarios({ 
+        search: searchQuery,
+        type: typeFilter 
+      });
       setScenarios(data);
     } catch (err) {
       setError('Ошибка загрузки сценариев');
@@ -33,6 +32,21 @@ export const ScenariosPage: FC = () => {
       setLoading(false);
     }
   };
+
+  const handleSearch = () => {
+    loadScenarios();
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
+  useEffect(() => {
+    loadScenarios();
+    loadCart();
+  }, []);
 
   const loadCart = async () => {
     try {
@@ -43,32 +57,40 @@ export const ScenariosPage: FC = () => {
     }
   };
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  };
-
   return (
     <Container fluid style={{ padding: 0 }}>
       <BreadCrumbs />
       
       {/* Хедер с поиском и корзиной */}
       <div className="search-and-cart">
-        <Form className="search-form" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+        <div className="search-controls" style={{ display: 'flex', gap: '10px', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
+          <Form.Select 
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value)}
+            style={{ width: 'auto' }}
+          >
+            <option value="">Все типы</option>
+            <option value="дорога">Дорога</option>
+            <option value="комфорт">Комфорт</option>
+          </Form.Select>
+          
           <Form.Control
             type="text"
             placeholder="Поиск условий езды..."
             value={searchQuery}
-            onChange={handleSearchChange}
-            style={{
-              width: '50%',
-              maxWidth: '400px',
-              padding: '10px',
-              border: '1px solid #e2e3e3',
-              borderRadius: '4px',
-              marginRight: '10px'
-            }}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyPress={handleKeyPress}
+            style={{ width: '300px' }}
           />
-        </Form>
+          
+          <Button 
+            variant="primary"
+            onClick={handleSearch}
+            style={{ marginLeft: '10px' }}
+          >
+            Поиск
+          </Button>
+        </div>
         
         <CartIcon count={cartCount} />
       </div>

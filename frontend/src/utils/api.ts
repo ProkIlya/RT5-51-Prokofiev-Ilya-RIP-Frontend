@@ -44,25 +44,27 @@ const mockScenarios: DrivingScenario[] = [
 
 export const api = {
   // Получение сценариев с фильтрацией - обновленный тип параметров
-  async getScenarios(filters?: { search?: string }): Promise<DrivingScenario[]> {
+  async getScenarios(filters?: { search?: string; type?: string }): Promise<DrivingScenario[]> {
     try {
       const params = new URLSearchParams();
       if (filters?.search) params.append('name', filters.search);
+      if (filters?.type) params.append('type', filters.type);
       
       const response = await fetch(`${API_BASE}/scenarios?${params}`);
       if (!response.ok) throw new Error('Network response was not ok');
       return await response.json();
     } catch (error) {
       console.error('API error, using mock data:', error);
-      // Фильтрация mock данных по search query
       let filtered = mockScenarios;
       if (filters?.search) {
         const searchLower = filters.search.toLowerCase();
         filtered = filtered.filter(s => 
           s.name.toLowerCase().includes(searchLower) ||
-          s.description.toLowerCase().includes(searchLower) ||
-          s.type.toLowerCase().includes(searchLower)
+          s.description.toLowerCase().includes(searchLower)
         );
+      }
+      if (filters?.type) {
+        filtered = filtered.filter(s => s.type === filters.type);
       }
       return filtered;
     }

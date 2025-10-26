@@ -16,13 +16,13 @@ export const CartIcon: FC<CartIconProps> = ({ count }) => {
         alignItems: 'center', 
         marginLeft: '20px', 
         position: 'relative',
-        opacity: isDisabled ? 0.5 : 1
+        opacity: isDisabled ? 0.3 : 0.7  // Измененная прозрачность
       }}
     >
       <span 
         className="cart-count" 
         style={{
-          backgroundColor: isDisabled ? '#6c757d' : '#3E6AE1',
+          backgroundColor: '#3E6AE1', // Всегда синий цвет
           color: 'white',
           borderRadius: '50%',
           padding: '3px 7px',
@@ -41,7 +41,7 @@ export const CartIcon: FC<CartIconProps> = ({ count }) => {
         style={{ 
           width: '60px', 
           height: '60px',
-          filter: isDisabled ? 'grayscale(100%)' : 'none'
+          // Убрано grayscale фильтр
         }}
         onError={(e) => {
           (e.target as HTMLImageElement).src = '/default-cart-icon.png';

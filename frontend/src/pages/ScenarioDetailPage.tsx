@@ -69,9 +69,7 @@ export const ScenarioDetailPage: FC = () => {
     <Container>
       <div style={{ textAlign: 'center', marginBottom: '20px' }}>
         <BreadCrumbs />
-        <Link to={ROUTES.SCENARIOS} className="btn btn-outline-secondary">
-          ← Назад к списку сценариев
-        </Link>
+    
       </div>
 
       <div className="scenario-detail">
