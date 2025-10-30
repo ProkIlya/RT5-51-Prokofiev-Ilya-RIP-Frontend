@@ -41,7 +41,7 @@ export interface TripScenario {
 }
 */
 export interface CartResponse {
-  TripID: number;
-  Count: number;
+  trip_id: number;
+  count: number;
 }
   

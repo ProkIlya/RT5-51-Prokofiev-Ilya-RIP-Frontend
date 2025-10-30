@@ -11,7 +11,7 @@ import './ScenarioDetailPage.css';
 export const ScenarioDetailPage: FC = () => {
   const { id } = useParams<{ id: string }>();
   const [scenario, setScenario] = useState<DrivingScenario | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoadingscenarios] = useState(true);
   const [error, setError] = useState<string>('');
 
   useEffect(() => {
@@ -21,7 +21,7 @@ export const ScenarioDetailPage: FC = () => {
   }, [id]);
 
   const loadScenario = async (scenarioId: number) => {
-    setLoading(true);
+    setLoadingscenarios(true);
     setError('');
     try {
       const data = await api.getScenario(scenarioId);
@@ -30,7 +30,7 @@ export const ScenarioDetailPage: FC = () => {
       setError('Ошибка загрузки сценария');
       console.error('Error loading scenario:', err);
     } finally {
-      setLoading(false);
+      setLoadingscenarios(false);
     }
   };
 

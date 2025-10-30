@@ -3,33 +3,33 @@ import type { FC } from 'react';
 import { Container, Form, Spinner, Alert, Button, Row, Col } from 'react-bootstrap';
 import { ScenarioCard } from '../components/ScenarioCard';
 import { BreadCrumbs } from '../components/BreadCrumbs';
-import { CartIcon } from '../components/CartIcon';
+import { CartIcon } from '../components/ScenariosCartIcon';
 import { api } from '../utils/api';
 import type { DrivingScenario } from '../types';
 import './ScenariosPage.css';
 
 export const ScenariosPage: FC = () => {
   const [scenarios, setScenarios] = useState<DrivingScenario[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loadingscenarios, setLoadingscenarios] = useState(false);
   const [error, setError] = useState<string>('');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [typeFilter, setTypeFilter] = useState('');
-  const [cartCount, setCartCount] = useState(0);
+  const [searchscenariosQuery, setSearchScenariosQuery] = useState('');
+  const [ScenarioTypeFilter, setScenarioTypeFilter] = useState('');
+  const [scenariocartCount, setScenariosCartCount] = useState(0);
 
   const loadScenarios = async () => {
-    setLoading(true);
+    setLoadingscenarios(true);
     setError('');
     try {
       const data = await api.getScenarios({ 
-        search: searchQuery,
-        type: typeFilter 
+        search: searchscenariosQuery,
+        type: ScenarioTypeFilter 
       });
       setScenarios(data);
     } catch (err) {
       setError('Ошибка загрузки сценариев');
       console.error('Error loading scenarios:', err);
     } finally {
-      setLoading(false);
+      setLoadingscenarios(false);
     }
   };
 
@@ -51,7 +51,7 @@ export const ScenariosPage: FC = () => {
   const loadCart = async () => {
     try {
       const cartData = await api.getCart();
-      setCartCount(cartData.Count);
+      setScenariosCartCount(cartData.count);
     } catch (err) {
       console.error('Error loading cart:', err);
     }
@@ -65,8 +65,8 @@ export const ScenariosPage: FC = () => {
       <div className="search-and-cart">
         <div className="search-controls" style={{ display: 'flex', gap: '10px', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
           <Form.Select 
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
+            value={ScenarioTypeFilter}
+            onChange={(e) => setScenarioTypeFilter(e.target.value)}
             style={{ width: 'auto' }}
           >
             <option value="">Все типы</option>
@@ -77,8 +77,8 @@ export const ScenariosPage: FC = () => {
           <Form.Control
             type="text"
             placeholder="Поиск условий езды..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            value={searchscenariosQuery}
+            onChange={(e) => setSearchScenariosQuery(e.target.value)}
             onKeyPress={handleKeyPress}
             style={{ width: '300px' }}
           />
@@ -92,7 +92,7 @@ export const ScenariosPage: FC = () => {
           </Button>
         </div>
         
-        <CartIcon count={cartCount} />
+        <CartIcon count={scenariocartCount} />
       </div>
 
       {error && (
@@ -101,7 +101,7 @@ export const ScenariosPage: FC = () => {
         </Alert>
       )}
 
-      {loading ? (
+      {loadingscenarios ? (
         <div className="text-center" style={{ padding: '40px' }}>
           <Spinner animation="border" />
           <div style={{ marginTop: '10px' }}>Загрузка сценариев...</div>
@@ -114,7 +114,7 @@ export const ScenariosPage: FC = () => {
         </div>
       )}
 
-      {!loading && scenarios.length === 0 && (
+      {!loadingscenarios && scenarios.length === 0 && (
         <Alert variant="info" style={{ maxWidth: '1200px', margin: '20px auto' }}>
           Сценарии не найдены
         </Alert>

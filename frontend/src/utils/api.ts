@@ -86,7 +86,20 @@ export const api = {
 
   // Получение корзины пустой и неактивной
   async getCart(): Promise<CartResponse> {
-    // Всегда возвращаем нули, корзина неактивна
-    return { TripID: 0, Count: 0 };
+  try {
+    const response = await fetch(`${API_BASE}/trips/scenarioscart`);
+    if (!response.ok) throw new Error('Network response was not ok');
+    const data = await response.json();
+    
+    // Преобразуем данные от бэкенда к ожидаемому формату
+    return {
+      trip_id: data.trip_id || data.TripID || 0,
+      count: data.count || data.Count || 0
+    };
+  } catch (error) {
+    console.error('API error for cart, using fallback:', error);
+    // Fallback: возвращаем нули, если бэкенд недоступен
+    return { trip_id: 0, count: 0 };
   }
+}
 };
