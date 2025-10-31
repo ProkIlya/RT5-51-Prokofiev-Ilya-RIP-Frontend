@@ -11,7 +11,7 @@ export const HomePage: FC = () => {
           title: "Сценарии",
           description: "Выбирайте готовые сценарии езды для поездок",
           action: "Перейти к сценариям",
-          link: ROUTES.SCENARIOS
+          link: "#" // ROUTES.SCENARIOS
         },
         {
           title: "Поездки", 
