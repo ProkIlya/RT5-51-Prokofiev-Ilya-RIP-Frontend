@@ -7,7 +7,16 @@ export const NavigationBar: FC = () => {
   const location = useLocation();
 
   return (
-    <Navbar bg="light" expand="lg" className="mb-0" style={{ borderBottom: '1px solid #e2e3e3' }}>
+    <Navbar 
+      bg="light" 
+      expand="lg" 
+      fixed="top"  // ДОБАВЬТЕ ЭТО
+      className="mb-0" 
+      style={{ 
+        borderBottom: '1px solid #e2e3e3',
+        zIndex: 1030  // Высокий z-index чтобы быть поверх других элементов
+      }}
+    >
       <Container fluid style={{ padding: '0 20px' }}>
         {/* Название сайта слева */}
         <Navbar.Brand as={Link} to={ROUTES.HOME} className="fw-bold">

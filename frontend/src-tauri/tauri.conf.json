@@ -23,7 +23,7 @@
     "beforeBuildCommand": "npm run build",
     "beforeDevCommand": "npm run dev",
     "frontendDist": "../dist",
-    "devUrl": "https://192.168.56.1:3000/"
+    "devUrl": "http://192.168.56.1:3000"
   },
   "bundle": {
     "active": true,
@@ -45,7 +45,10 @@
   "plugins": {
     "http": {
       "enabled": true,
-      "scope": ["http://192.168.56.1:8080/**"] 
+      "scope": [
+        "http://192.168.56.1:8080/**",
+        "http://192.168.56.1:9000/**"
+      ]
     }
   }
 }

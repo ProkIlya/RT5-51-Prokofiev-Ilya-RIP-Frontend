@@ -1,67 +1,36 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-import { VitePWA } from 'vite-plugin-pwa';
-import mkcert from 'vite-plugin-mkcert';
-import fs from 'fs'
-import path from 'path'
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+// Для Vite config используем прямые значения или импортируем из JS
+const target_tauri = true;
+const api_proxy_addr = "http://192.168.56.1:8080"
+const img_proxy_addr = "http://192.168.56.1:9000"
+const dest_root = target_tauri ? "" : ""
 
 export default defineConfig({
-  plugins: [
-    react(),
-    mkcert(),
-    VitePWA({
-      registerType: 'autoUpdate',
-      devOptions: {
-        enabled: true,
-      },
-      workbox: {
-        globPatterns: ['/*.{js,css,html,ico,png,svg,jpg,woff,woff2}']
-      },
-      manifest: {
-        name: "Tesla Charge Calculator",
-        short_name: "Tesla Charge Calc",
-        start_url: "./",
-        display: "standalone",
-        background_color: "#ffffff",
-        theme_color: "#3E6AE1",
-        orientation: "portrait-primary",
-        icons: [
-          {
-            src: "icon.png",
-            type: "image/png",
-            sizes: "192x192"
-          },
-          {
-            src: "default-scenario.jpg",
-            type: "image/jpeg",
-            sizes: "512x512"
-          }
-        ],
-      }
-    })
-  ],
-  base: "/", // "/RT5-51-Prokofiev-Ilya-RIP-Frontend/"
+  base: dest_root,
+  plugins: [react()],
   server: {
-    //https: true,
-    host: '192.168.56.1', // 0.0.0.0
-    https: {
-      key: fs.readFileSync(path.resolve(__dirname, 'cert.key')),
-      cert: fs.readFileSync(path.resolve(__dirname, 'cert.crt')),
-    },
     port: 3000,
+    host: '192.168.56.1',
+    strictPort: true,
+    cors: true,
     proxy: {
       "/api": {
-        target: "http://192.168.56.1:8080",
+        target: api_proxy_addr,
         changeOrigin: true,
         secure: false,
+        //rewrite: (path) => path.replace(/^\/api/, '/api')
+      },
+      "/img-proxy": {
+        target: img_proxy_addr,
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/img-proxy/, '')
       }
-    },
-    watch: {
-      ignored: ["/src-tauri/**"]
-    },
+    }
   },
   build: {
-    outDir: 'dist',
-    sourcemap: true,
+    target: 'esnext'
   }
-});
+})

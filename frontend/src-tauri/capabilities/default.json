@@ -6,23 +6,34 @@
   "permissions": [
     "core:default",
     "core:window:default",
-    "core:window:allow-set-title",
-    "core:window:allow-close",
-    "core:window:allow-maximize", 
-    "core:window:allow-minimize",
-    "core:window:allow-unmaximize",
-    "core:window:allow-unminimize",
-    "core:window:allow-show",
-    "core:window:allow-hide",
-    "core:window:allow-set-focus",
-    "core:window:allow-start-dragging",
-    "core:event:default",
-    "core:app:default",
-    "core:menu:default",
-    "core:tray:default",
-    
     "http:default",
     "http:allow-fetch",
-    "shell:default"
+    "http:allow-fetch-read-body", 
+    "http:allow-fetch-send",
+    "cors-fetch:default",
+    "cors-fetch:allow-cors-request",
+    
+    {
+      "identifier": "http:allow-fetch",
+      "allow": [
+        {
+          "url": "http://192.168.56.1:8080/**"
+        },
+        {
+          "url": "http://192.168.56.1:9000/**"
+        }
+      ]
+    },
+    {
+      "identifier": "http:allow-fetch-read-body",
+      "allow": [
+        {
+          "url": "http://192.168.56.1:8080/**"
+        },
+        {
+          "url": "http://192.168.56.1:9000/**"
+        }
+      ]
+    }
   ]
 }

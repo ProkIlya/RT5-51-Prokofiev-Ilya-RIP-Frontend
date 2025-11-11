@@ -21,3 +21,4 @@
 .env
 /backend/.env
 configure-minio.sh
+/frontend/dev-dist

@@ -1,22 +1,59 @@
 import type { DrivingScenario, CartResponse } from '../types';
+//import { dest_api, dest_img } from './target_config';
 
-// Умная функция для определения базового URL
-const getApiBaseUrl = () => {
-  if (typeof window !== 'undefined' && (window as any).__TAURI__ !== undefined) {
-    if (import.meta.env.DEV) {
-      // DEV режим
-      return 'https://192.168.56.1:3000/api';
-    } else {
-      // BUILD режим
-      return 'http://192.168.56.1:8080/api';
+
+// функция для определения окружения
+const getEnvironment = () => {
+  // Проверяем, находимся ли мы в Tauri
+  const isTauri = typeof window !== 'undefined' && !!(window as any).__TAURI__;
+  
+  if (!isTauri) {
+    return 'browser'; // Обычный браузер
+  }
+  
+  // В Tauri - определяем dev или build по URL
+  if (typeof window !== 'undefined' && window.location) {
+    const currentUrl = window.location.href;
+    
+    // Если URL содержит порт 3000 - это dev режим
+    if (currentUrl.includes(':3000')) {
+      return 'tauri-dev';
+    }
+    
+    // Если URL содержит tauri:// или file:// - это build режим
+    if (currentUrl.startsWith('tauri://') || currentUrl.startsWith('file://')) {
+      return 'tauri-build';
     }
   }
-  // PWA везде
-  return '/api';
+  
+  // Fallback - считаем что это build режим
+  return 'tauri-build';
 };
-const API_BASE = getApiBaseUrl();
 
-// Mock данные (оставляем ваши существующие)
+// функция для определения базового URL
+const getApiBaseUrl = () => {
+  const environment = getEnvironment();
+  
+  console.log('Detected environment:', environment);
+  
+  switch (environment) {
+    case 'tauri-dev':
+      // Tauri dev режим: используем Vite прокси через порт 3000
+      return 'http://192.168.56.1:8080/api';
+    
+    case 'tauri-build':
+      // Tauri build режим: прямой доступ к API через порт 8080
+      return 'http://192.168.56.1:8080/api';
+    
+    case 'browser':
+    default:
+      // Обычный браузер: прокси через Vite
+      return '/api';
+  }
+};
+
+const API_BASE = getApiBaseUrl();
+// Mock данные
 const mockScenarios: DrivingScenario[] = [
   {
     id: 1,
@@ -56,83 +93,91 @@ const mockScenarios: DrivingScenario[] = [
   }
 ];
 
-// НОВАЯ ФУНКЦИЯ: Умный fetch для обхода CORS
-/*const tauriFetch = async (url: string, options: RequestInit = {}) => {
-  const isTauri = typeof window !== 'undefined' && (window as any).__TAURI__ !== undefined;
+// Функция для обработки URL изображений
+export const getImageUrl = (imagePath: string | undefined | null): string => {
+  if (!imagePath) return '/default-scenario.jpg';
   
-  if (isTauri) {
-    // Для Tauri используем полный URL и добавляем заголовки для CORS
-    const fullUrl = url.startsWith('http') ? url : `http://192.168.56.1:8080${url}`;
-    
-    try {
-      const response = await fetch(fullUrl, {
-        ...options,
-        headers: {
-          'Content-Type': 'application/json',
-          ...options.headers,
-        },
-        mode: 'cors',
-        credentials: 'omit'
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      return response;
-    } catch (error) {
-      console.error('Tauri fetch error:', error);
-      throw error;
-    }
+  if (imagePath.startsWith('http')) {
+    return imagePath;
   } else {
-    // Для веб-версии используем обычный fetch
-    return fetch(url, options);
+    const environment = getEnvironment();
+    if (environment === 'tauri-build') {
+      // В Tauri build: прямой доступ к MinIO
+      return `http://192.168.56.1:9000${imagePath}`;
+    } else {
+      // В браузере и Tauri dev: через прокси
+      return `/img-proxy${imagePath}`;
+    }
   }
-};*/
+};
 
-const tauriFetch = async (url: string, options: RequestInit = {}) => {
-  return fetch(url, {
+
+
+const smartFetch = async (url: string, options: RequestInit = {}) => {
+  const environment = getEnvironment();
+  const fullUrl = url.startsWith('http') ? url : `${API_BASE}${url}`;
+  
+  console.log('Fetch details:', {
+    fullUrl,
+    environment,
+    API_BASE,
+    originalUrl: url
+  });
+  
+  const config: RequestInit = {
     ...options,
     headers: {
       'Content-Type': 'application/json',
       ...options.headers,
     },
-    mode: 'cors',  
-    credentials: 'omit'  
-  });
-};
+    // В Tauri используем cors, в браузере - same-origin
+    mode: environment !== 'browser' ? 'cors' : 'same-origin',
+    credentials: 'omit'
+  };
 
+  try {
+    const response = await fetch(fullUrl, config);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    return response;
+  } catch (error) {
+    console.error('Fetch error:', error);
+    throw error;
+  }
+};
 
 export const api = {
   async getScenarios(filters?: { search?: string; type?: string }): Promise<DrivingScenario[]> {
     try {
-      console.log('Текущий API_BASE:', API_BASE);
-      console.log('Tauri detected:', typeof window !== 'undefined' && !!(window as any).__TAURI__);
+      const environment = getEnvironment();
+      console.log('API Configuration:', {
+        API_BASE,
+        environment
+      });
       
       const params = new URLSearchParams();
       if (filters?.search) params.append('name', filters.search);
       if (filters?.type) params.append('type', filters.type);
       
-      const url = `${API_BASE}/scenarios?${params}`;
-      console.log('Запрос к API:', url);
+      const url = `/scenarios?${params}`;
+      console.log('Request path:', url);
       
-      // ЗАМЕНА: используем tauriFetch вместо обычного fetch
-      const response = await tauriFetch(url, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
-      });
+      const response = await smartFetch(url, { method: 'GET' });
       
       if (response.ok) {
         const data = await response.json();
-        console.log('Получены данные с API:', data);
+        console.log('API response:', data);
         return data;
       } else {
-        console.log('API вернул ошибку, используем mock данные. Статус:', response.status);
+        console.log('API returned error, using mock data. Status:', response.status);
         throw new Error('API недоступен');
       }
       
     } catch (error) {
-      console.log('Используются mock данные. Ошибка:', error);
+      console.log('Using mock data. Error:', error);
       let filtered = mockScenarios;
       if (filters?.search) {
         const searchLower = filters.search.toLowerCase();
@@ -150,17 +195,13 @@ export const api = {
 
   async getScenario(id: number): Promise<DrivingScenario> {
     try {
-      console.log('Запрос сценария по ID:', id);
-      // ЗАМЕНА: используем tauriFetch вместо обычного fetch
-      const response = await tauriFetch(`${API_BASE}/scenarios/${id}`);
+      const response = await smartFetch(`/scenarios/${id}`);
       
       if (response.ok) {
         return await response.json();
       } else {
-        console.log('API вернул ошибку, используем mock данные. Статус:', response.status);
         throw new Error('API недоступен');
       }
-      
     } catch (error) {
       console.error('API error, using mock data:', error);
       const scenario = mockScenarios.find(s => s.id === id);
@@ -171,26 +212,30 @@ export const api = {
 
   async getCart(): Promise<CartResponse> {
     try {
-      console.log('Запрос корзины по адресу:', `${API_BASE}/trips/scenarioscart`);
-      // ЗАМЕНА: используем tauriFetch вместо обычного fetch
-      const response = await tauriFetch(`${API_BASE}/trips/scenarioscart`);
+      const response = await smartFetch(`/trips/scenarioscart`);
       
       if (response.ok) {
         const data = await response.json();
-        console.log('Данные корзины:', data);
-        
         return {
           trip_id: data.trip_id || data.TripID || 0,
           count: data.count || data.Count || 0
         };
       } else {
-        console.log('Корзина недоступна, используем fallback. Статус:', response.status);
         return { trip_id: 0, count: 0 };
       }
-      
     } catch (error) {
-      console.error('API error for cart, using fallback:', error);
+      console.error('API error for cart:', error);
       return { trip_id: 0, count: 0 };
     }
+  },
+
+  // Функция для отладки - проверка окружения
+  debugEnvironment() {
+    return {
+      environment: getEnvironment(),
+      API_BASE,
+      currentUrl: typeof window !== 'undefined' && window.location ? window.location.href : 'undefined',
+      isTauri: typeof window !== 'undefined' && !!(window as any).__TAURI__
+    };
   }
 };

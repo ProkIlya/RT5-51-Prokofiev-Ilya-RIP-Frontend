@@ -1,6 +1,6 @@
 /* ScenarioDetailPage.css */
 .scenario-detail-container {
-  /* Убрал фиксированный паддинг, так как использую общий Navbar */
+   padding-top: 0
 }
 
 .scenario-detail-loading {
