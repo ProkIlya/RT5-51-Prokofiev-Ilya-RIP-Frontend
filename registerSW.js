@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/RT5-51-Prokofiev-Ilya-RIP-Frontend/sw.js', { scope: '/RT5-51-Prokofiev-Ilya-RIP-Frontend/' })})}
