@@ -36,7 +36,7 @@ export const CartIcon: FC<CartIconProps> = ({ count }) => {
         {count}
       </span>
       <img 
-        src="/icon.png" 
+        src="./icon.png" 
         alt="Корзина" 
         style={{ 
           width: '60px', 
@@ -44,7 +44,7 @@ export const CartIcon: FC<CartIconProps> = ({ count }) => {
           // Убрано grayscale фильтр
         }}
         onError={(e) => {
-          (e.target as HTMLImageElement).src = '/default-cart-icon.png';
+          (e.target as HTMLImageElement).src = './icon.png';
         }}
       />
     </div>

@@ -2,13 +2,15 @@ import type { FC } from 'react';
 import { Card, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import type { DrivingScenario } from '../types';
+//import { getImageUrl } from '../utils/api';
 
 interface ScenarioCardProps {
   scenario: DrivingScenario;
 }
 
 export const ScenarioCard: FC<ScenarioCardProps> = ({ scenario }) => {
-  const defaultImage = `${window.location.origin}/default-scenario.jpg`;
+  const defaultImage = './default-scenario.jpg';
+
   return (
     <Card 
       className="h-100 scenario-card" 
@@ -30,7 +32,7 @@ export const ScenarioCard: FC<ScenarioCardProps> = ({ scenario }) => {
        <Link to={`${scenario.id}`} style={{ textDecoration: 'none', color: 'inherit', flex: 1, display: 'flex', flexDirection: 'column' }}>
         <Card.Img 
           variant="top" 
-          src={scenario.image_url || defaultImage} 
+          src={scenario.image_url || defaultImage} // src={scenario.image_url || defaultImage} 
           style={{ 
             height: '200px', 
             objectFit: 'cover',

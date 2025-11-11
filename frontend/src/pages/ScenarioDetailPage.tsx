@@ -3,7 +3,7 @@ import type { FC} from 'react';
 import { Container, Spinner, Alert } from 'react-bootstrap';
 import { useParams, Link } from 'react-router-dom';
 import { BreadCrumbs } from '../components/BreadCrumbs';
-import { api } from '../utils/api';
+import { api, getImageUrl } from '../utils/api';
 import type { DrivingScenario } from '../types';
 import { ROUTES } from '../Routes';
 import './ScenarioDetailPage.css';
@@ -11,10 +11,10 @@ import './ScenarioDetailPage.css';
 export const ScenarioDetailPage: FC = () => {
   const { id } = useParams<{ id: string }>();
   const [scenario, setScenario] = useState<DrivingScenario | null>(null);
-  const [loading, setLoading] = useState(true); // Исправлено имя переменной
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
 
-  const defaultImage = `${window.location.origin}/RT5-51-Prokofiev-Ilya-RIP-Frontend/default-scenario.jpg`;
+  const defaultImage = '/default-scenario.jpg';
   
   useEffect(() => {
     if (id) {
@@ -75,10 +75,10 @@ export const ScenarioDetailPage: FC = () => {
 
       <div className="scenario-detail">
         <img 
-          src={scenario.image_url || defaultImage} 
+          src={getImageUrl(scenario.image_url)} 
           alt={scenario.name}
           onError={(e) => {
-            (e.target as HTMLImageElement).src = '/default-scenario.jpg';
+            (e.target as HTMLImageElement).src = defaultImage;
           }}
         />
         <h1>{scenario.name}</h1>
