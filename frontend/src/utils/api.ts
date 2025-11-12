@@ -95,7 +95,7 @@ const mockScenarios: DrivingScenario[] = [
 
 // Функция для обработки URL изображений
 export const getImageUrl = (imagePath: string | undefined | null): string => {
-  if (!imagePath) return '/default-scenario.jpg';
+  if (!imagePath) return './default-scenario.jpg';
   
   if (imagePath.startsWith('http')) {
     return imagePath;
