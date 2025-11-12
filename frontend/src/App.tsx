@@ -7,11 +7,23 @@ import { ScenariosPage } from './pages/ScenariosPage';
 import { ScenarioDetailPage } from './pages/ScenarioDetailPage';
 import { store } from './store/store';
 import { ROUTES } from './Routes';
-//import { invoke } from "@tauri-apps/api/core";
-//import { useEffect } from 'react';
+import { invoke } from "@tauri-apps/api/core";
+import { useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const App: FC = () => {
+  useEffect(()=>{
+    invoke('tauri', {cmd:'create'})
+      .then(() =>{console.log("Tauri launched")})
+      .catch(() =>{console.log("Tauri not launched")})
+    return () =>{
+      invoke('tauri', {cmd:'close'})
+        .then(() =>{console.log("Tauri launched")})
+        .catch(() =>{console.log("Tauri not launched")})
+    }
+  }, [])
+  
+  
   return (
     <Provider store={store}>
       <Router>
