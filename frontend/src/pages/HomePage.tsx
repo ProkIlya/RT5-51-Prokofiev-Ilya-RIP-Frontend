@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 //import { ROUTES } from '../Routes';
 import type { FC } from 'react';
 import './HomePage.css'; // Добавляем импорт CSS
+import MenuImage from "../assets/tesla-menu.jpg"
+
 
 export const HomePage: FC = () => {
   const carouselItems = [
@@ -60,7 +62,10 @@ export const HomePage: FC = () => {
   return (
     <div style={{ padding: 0, margin: 0 }}>
       {/* Герой-секция с CSS классами */}
-      <div className="hero-section">
+      <div 
+        className="hero-section"
+        style={{ backgroundImage: `url(${MenuImage})` }}
+      >
         <div className="hero-overlay"></div>
         <div className="hero-content">
           <h1 className="hero-title">

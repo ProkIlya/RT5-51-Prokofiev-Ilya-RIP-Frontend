@@ -1,7 +1,13 @@
-const target_tauri = true;
+const target_tauri = false //  true для Tauri, false для браузера
+;
+export const API_BASE_URL = target_tauri 
+  ? 'http://192.168.56.1:8080'  // Для Tauri - прямой IP
+  : '/api';                      // Для веб - proxy
 
-export const api_proxy_addr = "http://192.168.56.1:8080"
-export const img_proxy_addr = "http://192.168.56.1:9000"
-export const dest_api = target_tauri ? api_proxy_addr + "/api" : "/api"
-export const dest_img = target_tauri ? img_proxy_addr : "/img-proxy"
-export const dest_root = target_tauri ? "" : ""
+export const IMAGE_BASE_URL = target_tauri
+  ? 'http://192.168.56.1:9000'  // Для Tauri - прямой IP
+  : '/img-proxy';               // Для веб - proxy
+
+export const BASE_PATH = target_tauri 
+  ? ''
+  : '';

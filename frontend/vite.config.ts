@@ -5,16 +5,8 @@ import mkcert from 'vite-plugin-mkcert';
 import fs from 'fs'
 import path from 'path'
 
-// Для Vite config используем прямые значения или импортируем из JS
-const target_tauri = true;
-const api_proxy_addr = "http://192.168.56.1:8080"
-const img_proxy_addr = "http://192.168.56.1:9000"
-const dest_root = target_tauri ? "" : ""
-//const host = process.env.TAURI_DEV_HOST;
-
-
 export default defineConfig({
-  base: dest_root,
+  base: '/',
   plugins: [
     react(),
     mkcert(),
@@ -60,13 +52,12 @@ export default defineConfig({
     },
     proxy: {
       "/api": {
-        target: api_proxy_addr,
+        target: "http://192.168.56.1:8080",
         changeOrigin: true,
         secure: false,
-        //rewrite: (path) => path.replace(/^\/api/, '/api')
       },
       "/img-proxy": {
-        target: img_proxy_addr,
+        target: "http://192.168.56.1:9000",
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/img-proxy/, '')

@@ -1,11 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-
-// @ts-ignore - виртуальный модуль, создается плагином PWA
-//import { registerSW } from 'virtual:pwa-register';
-
 import App from './App';
-
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 console.log('Application starting...');
 console.log('Tauri available:', !!(window as any).__TAURI__);
@@ -24,7 +20,6 @@ root.render(
 window.addEventListener('error', (e) => {
   console.error('Global error:', e.error);
 });
-
 // Регистрация Service Worker
 /*if ("serviceWorker" in navigator) {
   registerSW();

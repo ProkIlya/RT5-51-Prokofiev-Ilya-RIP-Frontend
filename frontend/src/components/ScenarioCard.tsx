@@ -2,14 +2,14 @@ import type { FC } from 'react';
 import { Card, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import type { DrivingScenario } from '../types';
-import { getImageUrl } from '../utils/api';
+import defaultImage from "../assets/default-scenario.jpg"
 
 interface ScenarioCardProps {
   scenario: DrivingScenario;
 }
 
 export const ScenarioCard: FC<ScenarioCardProps> = ({ scenario }) => {
-  const defaultImage = '/default-scenario.jpg';
+  //const defaultImage = '/default-scenario.jpg';
 
   return (
     <Card 
@@ -29,17 +29,17 @@ export const ScenarioCard: FC<ScenarioCardProps> = ({ scenario }) => {
         e.currentTarget.style.transform = 'translateY(0)';
       }}
     >
-       <Link to={`${scenario.id}`} style={{ textDecoration: 'none', color: 'inherit', flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <Link to={`/scenarios/${scenario.id}`} style={{ textDecoration: 'none', color: 'inherit', flex: 1, display: 'flex', flexDirection: 'column' }}>
         <Card.Img 
           variant="top" 
-          src={getImageUrl(scenario.image_url) || defaultImage} // src={scenario.image_url || defaultImage} 
+          src={scenario.image_url || defaultImage}
           style={{ 
             height: '200px', 
             objectFit: 'cover',
             backgroundColor: '#f8f9fa'
           }}
           onError={(e) => {
-            (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDMwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjZTJlM2UzIi8+Cjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOTk5IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTYiPk5vIEltYWdlPC90ZXh0Pgo8L3N2Zz4K';
+            (e.target as HTMLImageElement).src = defaultImage;
           }}
         />
         <Card.Body className="d-flex flex-column" style={{ flex: 1 }}>

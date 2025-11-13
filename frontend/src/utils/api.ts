@@ -1,58 +1,12 @@
 import type { DrivingScenario, CartResponse } from '../types';
-//import { dest_api, dest_img } from './target_config';
+import { API_BASE_URL, IMAGE_BASE_URL} from './target_config';
+import { getApiBaseUrl } from '../config/api';
 
-
-// функция для определения окружения
-const getEnvironment = () => {
-  // Проверяем, находимся ли мы в Tauri
-  const isTauri = typeof window !== 'undefined' && !!(window as any).__TAURI__;
-  
-  if (!isTauri) {
-    return 'browser'; // Обычный браузер
-  }
-  
-  // В Tauri - определяем dev или build по URL
-  if (typeof window !== 'undefined' && window.location) {
-    const currentUrl = window.location.href;
-    
-    // Если URL содержит порт 3000 - это dev режим
-    if (currentUrl.includes(':3000')) {
-      return 'tauri-dev';
-    }
-    
-    // Если URL содержит tauri:// или file:// - это build режим
-    if (currentUrl.startsWith('tauri://') || currentUrl.startsWith('file://')) {
-      return 'tauri-build';
-    }
-  }
-  
-  // Fallback - считаем что это build режим
-  return 'tauri-build';
-};
-
-// функция для определения базового URL
-const getApiBaseUrl = () => {
-  const environment = getEnvironment();
-  
-  console.log('Detected environment:', environment);
-  
-  switch (environment) {
-    case 'tauri-dev':
-      // Tauri dev режим: используем Vite прокси через порт 3000
-      return 'http://192.168.56.1:8080/api';
-    
-    case 'tauri-build':
-      // Tauri build режим: прямой доступ к API через порт 8080
-      return 'http://192.168.56.1:8080/api';
-    
-    case 'browser':
-    default:
-      // Обычный браузер: прокси через Vite
-      return '/api';
-  }
-};
 
 const API_BASE = getApiBaseUrl();
+
+
+
 // Mock данные
 const mockScenarios: DrivingScenario[] = [
   {
@@ -100,84 +54,48 @@ export const getImageUrl = (imagePath: string | undefined | null): string => {
   if (imagePath.startsWith('http')) {
     return imagePath;
   } else {
-    const environment = getEnvironment();
-    if (environment === 'tauri-build') {
-      // В Tauri build: прямой доступ к MinIO
-      return `http://192.168.56.1:9000${imagePath}`;
-    } else {
-      // В браузере и Tauri dev: через прокси
-      return `/img-proxy${imagePath}`;
-    }
+    return `${IMAGE_BASE_URL}${imagePath}`;
   }
 };
 
 
 
-const smartFetch = async (url: string, options: RequestInit = {}) => {
-  const environment = getEnvironment();
-  const fullUrl = url.startsWith('http') ? url : `${API_BASE}${url}`;
-  
-  console.log('Fetch details:', {
-    fullUrl,
-    environment,
-    API_BASE,
-    originalUrl: url
-  });
-  
-  const config: RequestInit = {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-    // В Tauri используем cors, в браузере - same-origin
-    mode: environment !== 'browser' ? 'cors' : 'same-origin',
-    credentials: 'omit'
-  };
-
-  try {
-    const response = await fetch(fullUrl, config);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    return response;
-  } catch (error) {
-    console.error('Fetch error:', error);
-    throw error;
-  }
-};
 
 export const api = {
   async getScenarios(filters?: { search?: string; type?: string }): Promise<DrivingScenario[]> {
     try {
-      const environment = getEnvironment();
-      console.log('API Configuration:', {
-        API_BASE,
-        environment
-      });
-      
       const params = new URLSearchParams();
       if (filters?.search) params.append('name', filters.search);
       if (filters?.type) params.append('type', filters.type);
       
-      const url = `/scenarios?${params}`;
-      console.log('Request path:', url);
+      const url = filters 
+        ? `${API_BASE}/scenarios?${params}`
+        : `${API_BASE}/scenarios`;
       
-      const response = await smartFetch(url, { method: 'GET' });
+      console.log('API Request:', url);
       
-      if (response.ok) {
-        const data = await response.json();
-        console.log('API response:', data);
-        return data;
-      } else {
-        console.log('API returned error, using mock data. Status:', response.status);
-        throw new Error('API недоступен');
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
       
+      const data = await response.json();
+
+      // Обработка разных форматов ответа как у одногруппника
+      if (Array.isArray(data)) {
+        return data;
+      } else if (data && Array.isArray(data.scenarios)) {
+        return data.scenarios;
+      } else if (data && data.data && Array.isArray(data.data)) {
+        return data.data;
+      } else {
+        console.warn('Unexpected API response format:', data);
+        return [];
+      }
     } catch (error) {
-      console.log('Using mock data. Error:', error);
+      console.error('API Error:', error);
+      // Fallback на mock данные
       let filtered = mockScenarios;
       if (filters?.search) {
         const searchLower = filters.search.toLowerCase();
@@ -195,15 +113,17 @@ export const api = {
 
   async getScenario(id: number): Promise<DrivingScenario> {
     try {
-      const response = await smartFetch(`/scenarios/${id}`);
+      const response = await fetch(`${API_BASE_URL}/scenarios/${id}`);
       
-      if (response.ok) {
-        return await response.json();
-      } else {
-        throw new Error('API недоступен');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+      
+      const data = await response.json();
+      return data.scenario || data;
     } catch (error) {
-      console.error('API error, using mock data:', error);
+      console.error('API Error:', error);
+      // Fallback на mock данные
       const scenario = mockScenarios.find(s => s.id === id);
       if (scenario) return scenario;
       throw new Error('Scenario not found');
@@ -212,30 +132,20 @@ export const api = {
 
   async getCart(): Promise<CartResponse> {
     try {
-      const response = await smartFetch(`/trips/scenarioscart`);
+      const response = await fetch(`${API_BASE_URL}/trips/scenarioscart`);
       
-      if (response.ok) {
-        const data = await response.json();
-        return {
-          trip_id: data.trip_id || data.TripID || 0,
-          count: data.count || data.Count || 0
-        };
-      } else {
-        return { trip_id: 0, count: 0 };
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+      
+      const data = await response.json();
+      return {
+        trip_id: data.trip_id || data.TripID || 0,
+        count: data.count || data.Count || 0
+      };
     } catch (error) {
-      console.error('API error for cart:', error);
+      console.error('API Error:', error);
       return { trip_id: 0, count: 0 };
     }
-  },
-
-  // Функция для отладки - проверка окружения
-  debugEnvironment() {
-    return {
-      environment: getEnvironment(),
-      API_BASE,
-      currentUrl: typeof window !== 'undefined' && window.location ? window.location.href : 'undefined',
-      isTauri: typeof window !== 'undefined' && !!(window as any).__TAURI__
-    };
   }
 };
