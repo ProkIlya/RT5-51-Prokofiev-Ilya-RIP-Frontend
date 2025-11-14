@@ -4,7 +4,9 @@ import { Container, Form, Spinner, Alert, Button } from 'react-bootstrap';
 import { ScenarioCard } from '../components/ScenarioCard';
 import { BreadCrumbs } from '../components/BreadCrumbs';
 import { CartIcon } from '../components/ScenariosCartIcon';
-import { api } from '../utils/api';
+//import { api } from '../utils/api';
+import {getScenarios, getCart } from '../utils/api';
+
 import type { DrivingScenario } from '../types';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { setSearch, setType } from '../store/filtersSlice';
@@ -23,7 +25,7 @@ export const ScenariosPage: FC = () => {
     setLoading(true);
     setError('');
     try {
-      const data = await api.getScenarios({ 
+      const data = await getScenarios({ 
         search: filters.search,
         type: filters.type 
       });
@@ -63,7 +65,7 @@ export const ScenariosPage: FC = () => {
 
   const loadCart = async () => {
     try {
-      const cartData = await api.getCart();
+      const cartData = await getCart();
       setCartCount(cartData.count);
     } catch (err) {
       console.error('Error loading cart:', err);

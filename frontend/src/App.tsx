@@ -1,4 +1,5 @@
 import type { FC } from 'react';
+import { useEffect} from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { NavigationBar } from './components/Navbar';
@@ -11,6 +12,12 @@ import { BASE_PATH } from './utils/target_config';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const App: FC = () => {
+  useEffect(() => {
+    if (window.__TAURI__) {
+      console.log('Running in Tauri environment');
+    }
+  }, []);
+  
   return (
     <Provider store={store}>
       <Router basename={BASE_PATH}>

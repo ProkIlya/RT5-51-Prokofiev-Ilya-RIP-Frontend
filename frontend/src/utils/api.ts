@@ -1,14 +1,9 @@
 import type { DrivingScenario, CartResponse } from '../types';
-import { API_BASE_URL, IMAGE_BASE_URL} from './target_config';
-import { getApiBaseUrl } from '../config/api';
-
-
-const API_BASE = getApiBaseUrl();
-
-
+import { IMAGE_BASE_URL } from './target_config';
+import { getApiBaseUrl } from '../config/confapi';
 
 // Mock данные
-const mockScenarios: DrivingScenario[] = [
+const SCENARIOS_MOCK: DrivingScenario[] = [
   {
     id: 1,
     name: "Городская езда",
@@ -47,6 +42,11 @@ const mockScenarios: DrivingScenario[] = [
   }
 ];
 
+// Проверяем, работаем ли мы в Tauri
+const isTauri = typeof window !== 'undefined' && window.__TAURI__ !== undefined;
+
+const API_BASE = getApiBaseUrl();
+
 // Функция для обработки URL изображений
 export const getImageUrl = (imagePath: string | undefined | null): string => {
   if (!imagePath) return '/default-scenario.jpg';
@@ -58,94 +58,141 @@ export const getImageUrl = (imagePath: string | undefined | null): string => {
   }
 };
 
+export const getScenarios = async (filters?: { search?: string; type?: string }): Promise<DrivingScenario[]> => {
+  try {
+    const queryParams = new URLSearchParams();
+    if (filters?.search) queryParams.append('name', filters.search);
+    if (filters?.type) queryParams.append('type', filters.type);
+    
+    const url = filters 
+      ? `${API_BASE}/scenarios?${queryParams}`
+      : `${API_BASE}/scenarios`;
+    
+    console.log('API Request:', url);
+    
+    let response: Response;
 
-
-
-export const api = {
-  async getScenarios(filters?: { search?: string; type?: string }): Promise<DrivingScenario[]> {
-    try {
-      const params = new URLSearchParams();
-      if (filters?.search) params.append('name', filters.search);
-      if (filters?.type) params.append('type', filters.type);
-      
-      const url = filters 
-        ? `${API_BASE}/scenarios?${params}`
-        : `${API_BASE}/scenarios`;
-      
-      console.log('API Request:', url);
-      
-      const response = await fetch(url);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-
-      // Обработка разных форматов ответа как у одногруппника
-      if (Array.isArray(data)) {
-        return data;
-      } else if (data && Array.isArray(data.scenarios)) {
-        return data.scenarios;
-      } else if (data && data.data && Array.isArray(data.data)) {
-        return data.data;
-      } else {
-        console.warn('Unexpected API response format:', data);
-        return [];
-      }
-    } catch (error) {
-      console.error('API Error:', error);
-      // Fallback на mock данные
-      let filtered = mockScenarios;
-      if (filters?.search) {
-        const searchLower = filters.search.toLowerCase();
-        filtered = filtered.filter(s => 
-          s.name.toLowerCase().includes(searchLower) ||
-          s.description.toLowerCase().includes(searchLower)
-        );
-      }
-      if (filters?.type) {
-        filtered = filtered.filter(s => s.type === filters.type);
-      }
-      return filtered;
+    if (isTauri) {
+      // Для Tauri используем плагин HTTP
+      const { fetch: tauriFetch } = await import('@tauri-apps/plugin-http');
+      response = await tauriFetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    } else {
+      // Для веба используем стандартный fetch
+      response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
     }
-  },
 
-  async getScenario(id: number): Promise<DrivingScenario> {
-    try {
-      const response = await fetch(`${API_BASE_URL}/scenarios/${id}`);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      return data.scenario || data;
-    } catch (error) {
-      console.error('API Error:', error);
-      // Fallback на mock данные
-      const scenario = mockScenarios.find(s => s.id === id);
-      if (scenario) return scenario;
-      throw new Error('Scenario not found');
-    }
-  },
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-  async getCart(): Promise<CartResponse> {
-    try {
-      const response = await fetch(`${API_BASE_URL}/trips/scenarioscart`);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      return {
-        trip_id: data.trip_id || data.TripID || 0,
-        count: data.count || data.Count || 0
-      };
-    } catch (error) {
-      console.error('API Error:', error);
-      return { trip_id: 0, count: 0 };
+    const data = await response.json();
+
+    // Обработка разных форматов ответа
+    if (Array.isArray(data)) {
+      return data;
+    } else if (data && Array.isArray(data.scenarios)) {
+      return data.scenarios;
+    } else if (data && data.data && Array.isArray(data.data)) {
+      return data.data;
+    } else {
+      console.warn('Unexpected API response format, using mock data');
+      return filterMockScenarios(SCENARIOS_MOCK, filters);
     }
+  } catch (error) {
+    console.warn('Using mock data due to API error:', error);
+    return filterMockScenarios(SCENARIOS_MOCK, filters);
   }
+};
+
+export const getScenario = async (id: number): Promise<DrivingScenario> => {
+  try {
+    let response: Response;
+
+    if (isTauri) {
+      const { fetch: tauriFetch } = await import('@tauri-apps/plugin-http');
+      response = await tauriFetch(`${API_BASE}/scenarios/${id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    } else {
+      response = await fetch(`${API_BASE}/scenarios/${id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    }
+
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    
+    const data = await response.json();
+    return data.scenario || data;
+  } catch (error) {
+    console.warn('Using mock data due to API error:', error);
+    const scenario = SCENARIOS_MOCK.find(s => s.id === id);
+    if (scenario) return scenario;
+    throw new Error('Scenario not found');
+  }
+};
+
+export const getCart = async (): Promise<CartResponse> => {
+  try {
+    let response: Response;
+
+    if (isTauri) {
+      const { fetch: tauriFetch } = await import('@tauri-apps/plugin-http');
+      response = await tauriFetch(`${API_BASE}/trips/scenarioscart`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    } else {
+      response = await fetch(`${API_BASE}/trips/scenarioscart`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    }
+
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    
+    const data = await response.json();
+    return {
+      trip_id: data.trip_id || data.TripID || 0,
+      count: data.count || data.Count || 0
+    };
+  } catch (error) {
+    console.warn('Failed to get cart count:', error);
+    return { trip_id: 0, count: 0 };
+  }
+};
+
+const filterMockScenarios = (scenarios: DrivingScenario[], filters?: { search?: string; type?: string }): DrivingScenario[] => {
+  let filtered = scenarios;
+
+  if (filters?.search) {
+    const searchLower = filters.search.toLowerCase();
+    filtered = filtered.filter(s => 
+      s.name.toLowerCase().includes(searchLower) ||
+      s.description.toLowerCase().includes(searchLower)
+    );
+  }
+
+  if (filters?.type) {
+    filtered = filtered.filter(s => s.type === filters.type);
+  }
+
+  return filtered;
 };

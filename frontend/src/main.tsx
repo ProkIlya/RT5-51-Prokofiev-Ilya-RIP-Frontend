@@ -17,9 +17,7 @@ root.render(
   </React.StrictMode>
 );
 
-window.addEventListener('error', (e) => {
-  console.error('Global error:', e.error);
-});
+
 // Регистрация Service Worker
 /*if ("serviceWorker" in navigator) {
   registerSW();

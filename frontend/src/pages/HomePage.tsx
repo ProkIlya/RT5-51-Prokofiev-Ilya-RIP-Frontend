@@ -3,8 +3,7 @@ import { Link } from 'react-router-dom';
 //import { ROUTES } from '../Routes';
 import type { FC } from 'react';
 import './HomePage.css'; // Добавляем импорт CSS
-import MenuImage from "../assets/tesla-menu.jpg"
-
+import teslaMenuImage from "../assets/tesla-menu.jpg"
 
 export const HomePage: FC = () => {
   const carouselItems = [
@@ -64,7 +63,7 @@ export const HomePage: FC = () => {
       {/* Герой-секция с CSS классами */}
       <div 
         className="hero-section"
-        style={{ backgroundImage: `url(${MenuImage})` }}
+        style={{ backgroundImage: `url(${teslaMenuImage})` }}
       >
         <div className="hero-overlay"></div>
         <div className="hero-content">

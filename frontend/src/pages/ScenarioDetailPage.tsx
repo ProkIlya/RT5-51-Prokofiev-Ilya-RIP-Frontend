@@ -3,7 +3,8 @@ import type { FC} from 'react';
 import { Container, Spinner, Alert } from 'react-bootstrap';
 import { useParams, Link } from 'react-router-dom';
 import { BreadCrumbs } from '../components/BreadCrumbs';
-import { api } from '../utils/api';
+//import { api } from '../utils/api';
+import { getScenario} from '../utils/api';
 import type { DrivingScenario } from '../types';
 import { ROUTES } from '../Routes';
 import './ScenarioDetailPage.css';
@@ -27,7 +28,7 @@ export const ScenarioDetailPage: FC = () => {
     setLoading(true);
     setError('');
     try {
-      const data = await api.getScenario(scenarioId);
+      const data = await getScenario(scenarioId);
       setScenario(data);
     } catch (err) {
       setError('Ошибка загрузки сценария');
