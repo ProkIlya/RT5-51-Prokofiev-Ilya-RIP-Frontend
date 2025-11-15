@@ -43,7 +43,7 @@ export default defineConfig({
   base: "/", // "/RT5-51-Prokofiev-Ilya-RIP-Frontend/"
   server: {
     //https: true,
-    host: '192.168.56.1', // 0.0.0.0
+    host: '0.0.0.0', // 0.0.0.0
     https: {
       key: fs.readFileSync(path.resolve(__dirname, 'cert.key')),
       cert: fs.readFileSync(path.resolve(__dirname, 'cert.crt')),
