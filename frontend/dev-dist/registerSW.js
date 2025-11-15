@@ -1,1 +1,1 @@
-if('serviceWorker' in navigator) navigator.serviceWorker.register('/dev-sw.js?dev-sw', { scope: '/', type: 'classic' })
+if('serviceWorker' in navigator) navigator.serviceWorker.register('/RT5-51-Prokofiev-Ilya-RIP-Frontend/dev-sw.js?dev-sw', { scope: '/RT5-51-Prokofiev-Ilya-RIP-Frontend/', type: 'classic' })

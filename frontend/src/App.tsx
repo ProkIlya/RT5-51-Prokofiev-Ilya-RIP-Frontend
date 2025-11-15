@@ -14,7 +14,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 const App: FC = () => {
   return (
     <Provider store={store}>
-      <Router>
+      <Router basename="/RT5-51-Prokofiev-Ilya-RIP-Frontend/">
         <NavigationBar />
         {/* Добавьте этот div с отступом сверху */}
         <div style={{ paddingTop: '56px' }}> {/* 56px - стандартная высота Navbar */}
