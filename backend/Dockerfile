@@ -32,6 +32,10 @@ COPY --from=builder /app/tesla-app .
 COPY --from=builder /app/config/config.toml .
 COPY --from=builder /app/.env .
 
+# Копируем SSL сертификаты для HTTPS
+COPY --from=builder /app/cert.crt .
+COPY --from=builder /app/cert.key .
+
 # Открываем порт
 EXPOSE 8080
 

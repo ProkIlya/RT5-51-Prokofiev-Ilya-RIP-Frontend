@@ -22,3 +22,8 @@
 /backend/.env
 configure-minio.sh
 src-tauri
+
+cert.crt
+cert.key
+ca.key
+ca.crt
