@@ -51,7 +51,12 @@ export default defineConfig({
     port: 3000,
     proxy: {
       "/api": {
-        target: "http://192.168.56.1:8080",
+        target: "https://localhost:8080",
+        changeOrigin: true,
+        secure: false,
+      },
+      "/img-proxy": {
+        target: "http://192.168.56.1:9000", // MinIO пока оставляем по IP
         changeOrigin: true,
         secure: false,
       }
