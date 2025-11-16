@@ -7,6 +7,7 @@ import { api, getImageUrl } from '../utils/api';
 import type { DrivingScenario } from '../types';
 import { ROUTES } from '../Routes';
 import './ScenarioDetailPage.css';
+import defaultImage from "../assets/default-scenario.jpg"
 
 export const ScenarioDetailPage: FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -14,7 +15,7 @@ export const ScenarioDetailPage: FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
 
-  const defaultImage = '/default-scenario.jpg';
+  //const defaultImage = '/default-scenario.jpg';
   
   useEffect(() => {
     if (id) {
