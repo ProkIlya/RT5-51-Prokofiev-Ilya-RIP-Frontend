@@ -31,7 +31,7 @@ const getEnvironment = () => {
 };
 
 // функция для определения базового URL
-const getApiBaseUrl = () => {
+/*const getApiBaseUrl = () => {
   const environment = getEnvironment();
   
   console.log('Detected environment:', environment);
@@ -50,9 +50,12 @@ const getApiBaseUrl = () => {
       // Обычный браузер: прокси через Vite
       return '/api';
   }
-};
+};*/
 
-const API_BASE = getApiBaseUrl();
+const API_BASE = 'https://192.168.56.1:8080/api'; // const API_BASE = 'https://192.168.56.1:8080/api'
+
+
+//const API_BASE = getApiBaseUrl();
 // Mock данные
 const mockScenarios: DrivingScenario[] = [
   {
@@ -94,7 +97,7 @@ const mockScenarios: DrivingScenario[] = [
 ];
 
 // Функция для обработки URL изображений
-export const getImageUrl = (imagePath: string | undefined | null): string => {
+/*export const getImageUrl = (imagePath: string | undefined | null): string => {
   if (!imagePath) return './default-scenario.jpg';
   
   if (imagePath.startsWith('http')) {
@@ -109,9 +112,26 @@ export const getImageUrl = (imagePath: string | undefined | null): string => {
       return `/img-proxy${imagePath}`;
     }
   }
+};*/
+
+export const getImageUrl = (imagePath: string | undefined | null): string => {
+  if (!imagePath) return './default-scenario.jpg';
+  if (imagePath.startsWith('http')) {
+    return imagePath;
+  } else {
+    // ✅ Для GitHub Pages используй абсолютный URL
+    if (typeof window !== 'undefined' && window.location?.hostname === 'prokilya.github.io') {
+      return `https://192.168.0.104:9000${imagePath}`;
+    }
+    
+    const environment = getEnvironment();
+    if (environment === 'tauri-build') {
+      return `https://192.168.56.1:9000${imagePath}`;
+    } else {
+      return `/img-proxy${imagePath}`;
+    }
+  }
 };
-
-
 
 const smartFetch = async (url: string, options: RequestInit = {}) => {
   const environment = getEnvironment();
@@ -131,7 +151,7 @@ const smartFetch = async (url: string, options: RequestInit = {}) => {
       ...options.headers,
     },
     // В Tauri используем cors, в браузере - same-origin
-    mode: environment !== 'browser' ? 'cors' : 'same-origin',
+    mode: 'cors', // mode: environment !== 'browser' ? 'cors' : 'same-origin',
     credentials: 'omit'
   };
 
