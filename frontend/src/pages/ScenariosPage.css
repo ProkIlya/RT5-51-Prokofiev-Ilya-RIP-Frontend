@@ -1,0 +1,227 @@
+/* ScenariosPage.css */
+.search-and-cart {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  background-color: #FFFFFF;
+  max-width: 1200px;
+  margin: 0 auto;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.search-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+}
+
+.search-form {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  align-items: center;
+  flex: 1;
+}
+
+.search-input {
+  width: 50%;
+  max-width: 400px;
+  padding: 10px;
+  border: 1px solid #e2e3e3;
+  border-radius: 4px;
+  font-family: 'Universal Sans Text', Arial, sans-serif;
+  font-size: 14px;
+  background-color: #FFFFFF;
+}
+
+.scenarios-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Адаптивность для планшетов */
+@media (max-width: 1024px) {
+  .scenarios-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 15px;
+    padding: 15px;
+  }
+  
+  .search-input {
+    width: 70%;
+  }
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+  .search-and-cart {
+    flex-direction: column;
+    padding: 15px;
+  }
+  
+  .search-controls {
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+  }
+  
+  .search-controls .form-select,
+  .search-controls .form-control,
+  .search-controls .btn {
+    width: 100%;
+    max-width: none;
+  }
+  
+  .scenarios-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+    padding: 10px;
+  }
+  
+  .search-input {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+/* Для очень маленьких экранов */
+@media (max-width: 480px) {
+  .scenarios-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 5px;
+  }
+  
+  .search-and-cart {
+    padding: 10px;
+  }
+}
+
+/* Стили для карточек сценариев */
+.scenario-card {
+  background-color: #eee;
+  border: 1px solid #e2e3e3;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.scenario-card:hover {
+  transform: translateY(-5px);
+}
+
+.scenario-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.scenario-card-content {
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.scenario-card h2 {
+  font-family: 'Universal Sans Display', Arial, sans-serif;
+  font-size: 24px;
+  color: #171A20;
+  margin: 0 0 10px 0;
+}
+
+.parameters-column {
+  flex-grow: 1;
+}
+
+.parameters-column p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.scenario-actions {
+  margin-top: auto;
+  padding: 10px;
+  text-align: center;
+}
+
+.add-button {
+  background-color: #3E6AE1;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  width: 100%;
+}
+
+.add-button:hover {
+  background-color: #3457B1;
+}
+
+.add-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.scenario-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  flex-grow: 1;
+}
+
+.search-form {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .search-and-cart {
+    flex-direction: column;
+  }
+  
+  .search-form {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .search-form > * {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .search-and-cart {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-wrapper {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .search-form {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .search-form > * {
+    width: 100%;
+  }
+}
