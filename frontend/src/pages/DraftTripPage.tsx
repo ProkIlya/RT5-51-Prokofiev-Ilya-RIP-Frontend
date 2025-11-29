@@ -18,8 +18,11 @@ export const DraftTripPage = () => {
   
   const [startCharge, setStartCharge] = useState(0);
   const [editingDurations, setEditingDurations] = useState<{ [key: number]: number }>({});
+  const [originalDurations, setOriginalDurations] = useState<{ [key: number]: number }>({}); // Новое состояние для исходных значений
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [hasUnsavedTripChanges, setHasUnsavedTripChanges] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [savingScenarios, setSavingScenarios] = useState<{ [key: number]: boolean }>({});
 
   // Безопасное преобразование tripId в число
   const numericTripId = tripId ? parseInt(tripId, 10) : null;
@@ -34,11 +37,15 @@ export const DraftTripPage = () => {
     if (currentTrip) {
       setStartCharge(currentTrip.start_charge || 0);
       const durations: { [key: number]: number } = {};
+      const originalDurations: { [key: number]: number } = {};
       currentTrip.scenarios?.forEach((item: any) => {
         durations[item.scenario_id] = item.duration || 0;
+        originalDurations[item.scenario_id] = item.duration || 0; // Сохраняем исходные значения
       });
       setEditingDurations(durations);
+      setOriginalDurations(originalDurations);
       setHasUnsavedChanges(false);
+      setHasUnsavedTripChanges(false);
     }
   }, [currentTrip]);
 
@@ -56,29 +63,43 @@ export const DraftTripPage = () => {
         start_charge: startCharge 
       })).unwrap();
 
-      // Сохраняем все измененные длительности сценариев
-      const updatePromises = Object.entries(editingDurations).map(([scenarioId, duration]) => {
-        const scenario = currentTrip.scenarios?.find((s: any) => s.scenario_id === parseInt(scenarioId));
-        if (scenario && scenario.duration !== duration) {
-          return dispatch(updateTripScenario({
-            tripId: numericTripId,
-            scenarioId: parseInt(scenarioId),
-            duration
-          })).unwrap();
-        }
-        return Promise.resolve();
-      });
-
-      await Promise.all(updatePromises);
-
       // Обновляем данные после сохранения
       await dispatch(getTrip(numericTripId)).unwrap();
       setHasUnsavedChanges(false);
+      setHasUnsavedTripChanges(false);
       
     } catch (error) {
       console.error('Ошибка сохранения:', error);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleSaveScenario = async (scenarioId: number) => {
+    if (!numericTripId || !currentTrip) return;
+
+    setSavingScenarios(prev => ({ ...prev, [scenarioId]: true }));
+    try {
+      const duration = editingDurations[scenarioId];
+      await dispatch(updateTripScenario({
+        tripId: numericTripId,
+        scenarioId: scenarioId,
+        duration
+      })).unwrap();
+
+      // Обновляем исходные значения после сохранения
+      setOriginalDurations(prev => ({
+        ...prev,
+        [scenarioId]: duration
+      }));
+
+      // Обновляем данные после сохранения
+      await dispatch(getTrip(numericTripId)).unwrap();
+      
+    } catch (error) {
+      console.error('Ошибка сохранения сценария:', error);
+    } finally {
+      setSavingScenarios(prev => ({ ...prev, [scenarioId]: false }));
     }
   };
 
@@ -119,6 +140,7 @@ export const DraftTripPage = () => {
   const handleStartChargeChange = (value: number) => {
     setStartCharge(value);
     setHasUnsavedChanges(true);
+    setHasUnsavedTripChanges(true);
   };
 
   const handleRemoveScenario = async (scenarioId: number) => {
@@ -226,7 +248,7 @@ export const DraftTripPage = () => {
                   variant="primary" 
                   onClick={handleSaveTrip}
                   className="save-btn"
-                  disabled={!hasUnsavedChanges || isSubmitting}
+                  disabled={!hasUnsavedTripChanges || isSubmitting}
                 >
                   {isSubmitting ? <Spinner size="sm" /> : 'Сохранить изменения'}
                 </Button>
@@ -256,94 +278,155 @@ export const DraftTripPage = () => {
           <h3>Сценарии езды в поездке</h3>
           
           {currentTrip.scenarios && currentTrip.scenarios.length > 0 ? (
-            currentTrip.scenarios.map((item: any) => (
-              <div className="scenario-container" key={item.scenario_id}>
-                <div className="scenario-in-trip">
-                  <img 
-                    src={item.scenario.image_url || defaultImage} 
-                    alt={item.scenario.name}
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = defaultImage;
-                    }}
-                  />
-                  <div className="scenario-details">
-                    <h4>{item.scenario.name}</h4>
-                    <div className="scenario-parameters">
-                      {item.scenario.speed !== undefined && item.scenario.speed !== null && (
-                        <span className="scenario-parameter">
-                          Скорость: {item.scenario.speed} км/ч 
-                        </span>
-                      )}
-                      {item.scenario.aero_coeff !== undefined && item.scenario.aero_coeff !== null &&(
-                        <span className="scenario-parameter">
-                          Аэродинамика: {item.scenario.aero_coeff} 
-                        </span>
-                      )}
-                      {item.scenario.rolling_coeff !== undefined && item.scenario.rolling_coeff !== null && (
-                        <span className="scenario-parameter">
-                          Качение: {item.scenario.rolling_coeff} 
-                        </span>
-                      )}
-                      {item.scenario.system_consumption !== undefined && item.scenario.system_consumption !== null && (
-                        <span className="scenario-parameter">
-                          Потребление: {item.scenario.system_consumption} кВт⋅ч
-                        </span>
-                      )}
+            currentTrip.scenarios.map((item: any) => {
+              const hasScenarioChanges = editingDurations[item.scenario_id] !== originalDurations[item.scenario_id];
+              
+              return (
+                <div className="scenario-container" key={item.scenario_id}>
+                  <div className="scenario-in-trip">
+                    <img 
+                      src={item.scenario.image_url || defaultImage} 
+                      alt={item.scenario.name}
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = defaultImage;
+                      }}
+                    />
+                    <div className="scenario-details">
+                      <h4>{item.scenario.name}</h4>
+                      <div className="scenario-parameters">
+                        {/* Десктопная версия - 4 колонки */}
+                        <div className="desktop-parameters">
+                          <div className="scenario-parameters-header">
+                            <span>Скорость (км/ч)</span>
+                            <span>Аэродинамика</span>
+                            <span>Качение</span>
+                            <span>Потребление (кВт⋅ч)</span>
+                          </div>
+                          <div className="scenario-parameters-values">
+                            <span>{item.scenario.speed ?? '-'}</span>
+                            <span>{item.scenario.aero_coeff ?? '-'}</span>
+                            <span>{item.scenario.rolling_coeff ?? '-'}</span>
+                            <span>{item.scenario.system_consumption ?? '-'}</span>
+                          </div>
+                        </div>
+
+                        {/* Мобильная версия - 2x2 сетка */}
+                        <div className="mobile-parameters">
+                          <div className="scenario-parameter-group">
+                            <div className="scenario-parameter">
+                              <span className="scenario-parameter-label">Скорость (км/ч)</span>
+                              <span className="scenario-parameter-value">{item.scenario.speed ?? '-'}</span>
+                            </div>
+                            <div className="scenario-parameter">
+                              <span className="scenario-parameter-label">Аэродинамика</span>
+                              <span className="scenario-parameter-value">{item.scenario.aero_coeff ?? '-'}</span>
+                            </div>
+                          </div>
+                          <div className="scenario-parameter-group">
+                            <div className="scenario-parameter">
+                              <span className="scenario-parameter-label">Качение</span>
+                              <span className="scenario-parameter-value">{item.scenario.rolling_coeff ?? '-'}</span>
+                            </div>
+                            <div className="scenario-parameter">
+                              <span className="scenario-parameter-label">Потребление (кВт⋅ч)</span>
+                              <span className="scenario-parameter-value">{item.scenario.system_consumption ?? '-'}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="scenario-side">
+                    <div className="scenario-side-controls">
+                      <div className="scenario-input-group">
+                        {item.scenario.type === 'дорога' ? (
+                          <>
+                            <span className="scenario-side-label">Расстояние (км)</span>
+                            <div className="scenario-input-with-buttons">
+                              <Form.Control
+                                type="number"
+                                value={editingDurations[item.scenario_id] || 0}
+                                onChange={(e) => handleDurationChange(
+                                  item.scenario_id, 
+                                  parseFloat(e.target.value)
+                                )}
+                                disabled={!isDraft || !isOwner}
+                                min="0"
+                                step="1"
+                                className="calculation-purpose"
+                              />
+                              {isDraft && isOwner && (
+                                <div className="scenario-buttons">
+                                  <Button
+                                    variant="outline-primary"
+                                    size="sm"
+                                    onClick={() => handleSaveScenario(item.scenario_id)}
+                                    className="save-scenario-btn"
+                                    disabled={savingScenarios[item.scenario_id] || !hasScenarioChanges}
+                                  >
+                                    {savingScenarios[item.scenario_id] ? <Spinner size="sm" /> : 'Сохранить'}
+                                  </Button>
+                                  <Button
+                                    variant="outline-danger"
+                                    size="sm"
+                                    onClick={() => handleRemoveScenario(item.scenario_id)}
+                                    className="remove-scenario-btn"
+                                    disabled={isSubmitting}
+                                  >
+                                    Удалить
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <span className="scenario-side-label">Время (ч)</span>
+                            <div className="scenario-input-with-buttons">
+                              <Form.Control
+                                type="number"
+                                value={editingDurations[item.scenario_id] || 0}
+                                onChange={(e) => handleDurationChange(
+                                  item.scenario_id, 
+                                  parseFloat(e.target.value)
+                                )}
+                                disabled={!isDraft || !isOwner}
+                                min="0"
+                                step="1"
+                                className="calculation-purpose"
+                              />
+                              {isDraft && isOwner && (
+                                <div className="scenario-buttons">
+                                  <Button
+                                    variant="outline-primary"
+                                    size="sm"
+                                    onClick={() => handleSaveScenario(item.scenario_id)}
+                                    className="save-scenario-btn"
+                                    disabled={savingScenarios[item.scenario_id] || !hasScenarioChanges}
+                                  >
+                                    {savingScenarios[item.scenario_id] ? <Spinner size="sm" /> : 'Сохранить'}
+                                  </Button>
+                                  <Button
+                                    variant="outline-danger"
+                                    size="sm"
+                                    onClick={() => handleRemoveScenario(item.scenario_id)}
+                                    className="remove-scenario-btn"
+                                    disabled={isSubmitting}
+                                  >
+                                    Удалить
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
-                
-                <div className="scenario-side">
-                  <div className="scenario-side-row">
-                    {item.scenario.type === 'дорога' ? (
-                      <>
-                        <span className="scenario-side-label">Расстояние (км)</span>
-                        <Form.Control
-                          type="number"
-                          value={editingDurations[item.scenario_id] || 0}
-                          onChange={(e) => handleDurationChange(
-                            item.scenario_id, 
-                            parseFloat(e.target.value)
-                          )}
-                          disabled={!isDraft || !isOwner}
-                          min="0"
-                          step="1"
-                          className="calculation-purpose"
-                        />
-                      </>
-                    ) : (
-                      <>
-                        <span className="scenario-side-label">Время (ч)</span>
-                        <Form.Control
-                          type="number"
-                          value={editingDurations[item.scenario_id] || 0}
-                          onChange={(e) => handleDurationChange(
-                            item.scenario_id, 
-                            parseFloat(e.target.value)
-                          )}
-                          disabled={!isDraft || !isOwner}
-                          min="0"
-                          step="1"
-                          className="calculation-purpose"
-                        />
-                      </>
-                    )}
-                  </div>
-                  
-                  {isDraft && isOwner && (
-                    <Button
-                      variant="outline-danger"
-                      size="sm"
-                      onClick={() => handleRemoveScenario(item.scenario_id)}
-                      className="remove-scenario-btn"
-                      disabled={isSubmitting}
-                    >
-                      Удалить сценарий езды
-                    </Button>
-                  )}
-                </div>
-              </div>
-            ))
+              );
+            })
           ) : (
             <Alert variant="info">В заявке нет сценариев</Alert>
           )}

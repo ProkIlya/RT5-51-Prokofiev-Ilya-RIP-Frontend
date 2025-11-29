@@ -129,24 +129,65 @@
 
 .scenario-parameters {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+  flex-direction: column;
+  gap: 8px;
   margin-top: 8px;
 }
 
+/* Новые стили для правильного отображения параметров */
+.scenario-parameter-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
 .scenario-parameter {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.scenario-parameter-label {
+  font-weight: 500;
+  color: #171A20;
+  font-size: 0.9rem;
+}
+
+.scenario-parameter-value {
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+/* Старые стили для десктопной версии (скрываем на мобильных) */
+.scenario-parameters-header,
+.scenario-parameters-values {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 10px;
+}
+
+.scenario-parameters-header span {
+  font-weight: 500;
+  color: #171A20;
+  font-size: 0.9rem;
+}
+
+.scenario-parameters-values span {
   color: #6c757d;
   font-size: 0.9rem;
 }
 
 .scenario-side {
+  min-width: 300px;
+}
+
+.scenario-side-controls {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  min-width: 200px;
 }
 
-.scenario-side-row {
+.scenario-input-group {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -161,11 +202,30 @@
   width: 100%;
 }
 
-.remove-scenario-btn {
-  align-self: flex-start;
+/* Новые стили для расположения кнопок рядом с полем ввода */
+.scenario-input-with-buttons {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.scenario-input-with-buttons .form-control {
+  flex: 1;
+  min-width: 120px;
+}
+
+.scenario-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.scenario-buttons .btn {
+  white-space: nowrap;
 }
 
 /* Адаптивность */
+/* Мобильные устройства */
 @media (max-width: 768px) {
   .scenario-container {
     flex-direction: column;
@@ -192,5 +252,105 @@
   
   .trip-actions .btn {
     width: 100%;
+  }
+
+  /* Скрываем старую структуру на мобильных */
+  .scenario-parameters-header,
+  .scenario-parameters-values {
+    display: none;
+  }
+
+  /* Показываем новую структуру на мобильных */
+  .scenario-parameter-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .scenario-parameter {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .scenario-side {
+    min-width: 100%;
+  }
+
+  .scenario-input-with-buttons {
+    flex-direction: column;
+  }
+  
+  .scenario-buttons {
+    width: 100%;
+  }
+  
+  .scenario-buttons .btn {
+    flex: 1;
+  }
+}
+
+/* Планшеты и промежуточные разрешения */
+@media (min-width: 769px) and (max-width: 991px) {
+  .scenario-container {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  .scenario-in-trip {
+    flex: 1 1 100%;
+  }
+  
+  .scenario-side {
+    min-width: 100%;
+    margin-top: 1rem;
+  }
+  
+  .scenario-input-with-buttons {
+    flex-direction: row;
+    align-items: center;
+  }
+  
+  .scenario-buttons {
+    flex-shrink: 0;
+  }
+  
+  .scenario-buttons .btn {
+    min-width: 100px;
+  }
+  
+  /* Скрываем старую структуру на планшетах */
+  .scenario-parameters-header,
+  .scenario-parameters-values {
+    display: none;
+  }
+
+  /* Показываем новую структуру на планшетах */
+  .scenario-parameter-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+}
+
+/* Десктоп */
+@media (min-width: 992px) {
+  .scenario-input-with-buttons {
+    flex-direction: row;
+    align-items: center;
+  }
+  
+  .scenario-buttons {
+    flex-direction: row;
+  }
+
+  /* На десктопе скрываем новую структуру и показываем старую */
+  .scenario-parameter-group {
+    display: none;
+  }
+
+  .scenario-parameters-header,
+  .scenario-parameters-values {
+    display: grid;
   }
 }

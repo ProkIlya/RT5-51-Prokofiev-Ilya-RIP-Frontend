@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Container, Table, Button, Form, Row, Col, Spinner, Alert, Badge, Card } from 'react-bootstrap';
+import { Container, Button, Form, Row, Col, Spinner, Alert, Badge, Card } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { getTrips } from '../store/tripsSlice';
@@ -114,54 +114,89 @@ export const TripsPage = () => {
           <Spinner animation="border" />
         </div>
       ) : (
-        <div className="trips-table">
-          <Table responsive striped bordered hover>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Статус</th>
-                <th>Начальный заряд</th>
-                <th>Остаток заряда</th>
-                <th>Дата создания</th>
-                <th>Дата отправки</th>
-                <th>Дата завершения</th>
-                {user?.is_moderator && <th>Создатель</th>}
-                <th>Действия</th>
-              </tr>
-            </thead>
-            <tbody>
-              {trips.map((trip) => (
-                <tr key={trip.id}>
-                  <td>
-                    <Link 
-                      to={`/trips/${trip.id}`}
-                      style={{ textDecoration: 'none', fontWeight: 'bold' }}
-                    >
-                      {trip.id}
-                    </Link>
-                  </td>
-                  <td>
+        <div className="trips-cards">
+          {/* Шапка таблицы - видна только на десктопе */}
+          <div className="trip-table-header d-none d-md-grid">
+            <div className="trip-header-item">ID поездки</div>
+            <div className="trip-header-item">Статус</div>
+            <div className="trip-header-item">Начальный заряд (кВт⋅ч)</div>
+            <div className="trip-header-item">Остаток заряда (кВт⋅ч)</div>
+            <div className="trip-header-item">Дата создания</div>
+            <div className="trip-header-item">Дата отправки</div>
+            <div className="trip-header-item">Дата завершения</div>
+            <div className="trip-header-item">Действия</div>
+          </div>
+          
+          {trips.map((trip) => (
+            <div className="trip-card d-md-grid" key={trip.id}>
+              {/* Мобильный заголовок */}
+              <div className="trip-card-header d-md-none">
+                <div className="trip-card-title">
+                  <h4>Поездка #{trip.id}</h4>
+                  <Badge bg={getStatusVariant(trip.status)} className="status-badge">
+                    {trip.status}
+                  </Badge>
+                </div>
+                {user?.is_moderator && (
+                  <div className="trip-creator">
+                    Создатель: {trip.creator_login}
+                  </div>
+                )}
+              </div>
+              
+              {/* Содержимое - одинаковое для мобильных и десктопа, но по-разному отображается */}
+              <div className="trip-card-content">
+                {/* ID поездки */}
+                <div className="trip-info-item">
+                  <span className="trip-info-label d-md-none">ID поездки:</span>
+                  <span className="trip-info-value">#{trip.id}</span>
+                </div>
+                
+                {/* Статус */}
+                <div className="trip-info-item">
+                  <span className="trip-info-label d-md-none">Статус:</span>
+                  <span className="trip-info-value">
                     <Badge bg={getStatusVariant(trip.status)} className="status-badge">
                       {trip.status}
                     </Badge>
-                  </td>
-                  <td>{trip.start_charge ? `${trip.start_charge} кВт⋅ч` : '-'}</td>
-                  <td>{trip.remaining_charge ? `${trip.remaining_charge} кВт⋅ч` : '-'}</td>
-                  <td>{formatDate(trip.created_at)}</td>
-                  <td>{trip.submitted_at ? formatDate(trip.submitted_at) : '-'}</td>
-                  <td>{trip.completed_at ? formatDate(trip.completed_at) : '-'}</td>
-                  {user?.is_moderator && <td>{trip.creator_login}</td>}
-                  <td>
-                    <Link to={`/trips/${trip.id}`}>
-                      <Button variant="outline-primary" size="sm">
-                        Просмотреть
-                      </Button>
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
+                  </span>
+                </div>
+                
+                <div className="trip-info-item">
+                  <span className="trip-info-label d-md-none">Начальный заряд (кВт⋅ч):</span>
+                  <span className="trip-info-value">{trip.start_charge ? `${trip.start_charge}` : '-'}</span>
+                </div>
+                
+                <div className="trip-info-item">
+                  <span className="trip-info-label d-md-none">Остаток заряда (кВт⋅ч):</span>
+                  <span className="trip-info-value">{trip.remaining_charge ? `${trip.remaining_charge}` : '-'}</span>
+                </div>
+                
+                <div className="trip-info-item">
+                  <span className="trip-info-label d-md-none">Дата создания:</span>
+                  <span className="trip-info-value">{formatDate(trip.created_at)}</span>
+                </div>
+                
+                <div className="trip-info-item">
+                  <span className="trip-info-label d-md-none">Дата отправки:</span>
+                  <span className="trip-info-value">{trip.submitted_at ? formatDate(trip.submitted_at) : '-'}</span>
+                </div>
+                
+                <div className="trip-info-item">
+                  <span className="trip-info-label d-md-none">Дата завершения:</span>
+                  <span className="trip-info-value">{trip.completed_at ? formatDate(trip.completed_at) : '-'}</span>
+                </div>
+                
+                <div className="trip-card-actions">
+                  <Link to={`/trips/${trip.id}`}>
+                    <Button variant="outline-primary" size="sm">
+                      Просмотреть
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
