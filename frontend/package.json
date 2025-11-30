@@ -11,7 +11,7 @@
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
   },
-  "homepage": "/RT5-51-Prokofiev-Ilya-RIP-Frontend/",
+  "homepage": "/RT5-51-Prokofiev-Ilya-Tesla-Charge-Calculator-Frontend/",
   "dependencies": {
     "@reduxjs/toolkit": "^2.10.1",
     "@tauri-apps/api": "^2.9.0",

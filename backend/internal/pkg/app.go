@@ -100,8 +100,8 @@ func (a *Application) RunApp() {
 	serverAddress := fmt.Sprintf("%s:%d", a.Config.ServiceHost, a.Config.ServicePort)
 
 	// Запускаем HTTPS сервер
-	logrus.Info("Starting HTTPS server...")
-	if err := a.Router.RunTLS(serverAddress, "cert.crt", "cert.key"); err != nil {
+	logrus.Info("Starting HTTPS server...")                                        // logrus.Info("Starting HTTPS server...")
+	if err := a.Router.RunTLS(serverAddress, "cert.crt", "cert.key"); err != nil { // if err := a.Router.RunTLS(serverAddress, "cert.crt", "cert.key"); err != nil {
 		logrus.Fatal("HTTPS server failed: ", err)
 	}
 	logrus.Info("Server down")

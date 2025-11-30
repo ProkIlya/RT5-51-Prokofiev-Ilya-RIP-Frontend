@@ -20,7 +20,7 @@ export default defineConfig({
       manifest: {
         name: "Tesla Charge Calculator",
         short_name: "Tesla Charge Calc",
-        start_url: "/RT5-51-Prokofiev-Ilya-RIP-Frontend/",
+        start_url: "/RT5-51-Prokofiev-Ilya-Tesla-Charge-Calculator-Frontend/", //"/RT5-51-Prokofiev-Ilya-RIP-Frontend/"
         display: "standalone",
         background_color: "#ffffff",
         theme_color: "#3E6AE1",
@@ -40,7 +40,7 @@ export default defineConfig({
       }
     })
   ],
-  base: "/RT5-51-Prokofiev-Ilya-RIP-Frontend/", // "/RT5-51-Prokofiev-Ilya-RIP-Frontend/"
+  base: "/RT5-51-Prokofiev-Ilya-Tesla-Charge-Calculator-Frontend/", // "/RT5-51-Prokofiev-Ilya-RIP-Frontend/"  RT5-51-Prokofiev-Ilya-Tesla-Charge-Calculator-Frontend
   server: {
     //https: true,
     host: '0.0.0.0', // 0.0.0.0
