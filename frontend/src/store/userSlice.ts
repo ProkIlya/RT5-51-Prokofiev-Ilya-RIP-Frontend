@@ -82,7 +82,7 @@ export const updateUserProfile = createAsyncThunk(
     }
   }
 );
- 
+
 export const logoutUser = createAsyncThunk(
   'user/logout',
   async (_, { getState, rejectWithValue }) => {
