@@ -177,7 +177,7 @@ export const reviewTrip = createAsyncThunk(
       });
       return response;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Ошибка изменения статуса заявки');
+      return rejectWithValue(error.response?.data?.error || 'Ошибка изменения статуса поездки');
     }
   }
 );

@@ -66,8 +66,11 @@ export const TripsPage = () => {
   const handleReviewTrip = async (tripId: number, action: 'complete' | 'reject') => {
     try {
       await dispatch(reviewTrip({ tripId, action })).unwrap();
-      // Обновляем список после изменения
-      loadTrips(false, false);
+      // Для модератора polling обновит список автоматически
+      // Для обычного пользователя нужно перезагрузить список
+      if (!user?.is_moderator) {
+        loadTrips(false, false);
+      }
     } catch (error) {
       console.error('Ошибка при изменении статуса:', error);
     }
@@ -288,16 +291,16 @@ export const TripsPage = () => {
                 
                 {/* Остаток заряда */}
                 <div className="trip-info-item">
-  <span className="trip-info-label d-md-none">Остаток заряда (кВт⋅ч):</span>
-  <span className="trip-info-value">
-    {user?.is_moderator || trip.status === 'завершён' 
-      ? (trip.remaining_charge !== null && trip.remaining_charge !== undefined 
-          ? `${trip.remaining_charge.toFixed(2)}` 
-          : 'расчет...') 
-      : '—'
-    }
-  </span>
-</div>
+                  <span className="trip-info-label d-md-none">Остаток заряда (кВт⋅ч):</span>
+                  <span className="trip-info-value">
+                    {trip.status === 'завершён' 
+                      ? (trip.remaining_charge !== null && trip.remaining_charge !== undefined 
+                          ? `${trip.remaining_charge.toFixed(2)}` 
+                          : 'расчет...') 
+                      : '—'
+                    }
+                  </span>
+                </div>
                 
                 {/* Дата создания */}
                 <div className="trip-info-item">
