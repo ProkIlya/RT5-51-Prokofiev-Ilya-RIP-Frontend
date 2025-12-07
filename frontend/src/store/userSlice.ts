@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { api } from '../api';
 
-
 interface AuthResponse {
   user: {
     id: number;
@@ -10,7 +9,6 @@ interface AuthResponse {
   };
   token: string;
 }
-
 
 // Определяем интерфейс для состояния пользователя
 export interface UserState {

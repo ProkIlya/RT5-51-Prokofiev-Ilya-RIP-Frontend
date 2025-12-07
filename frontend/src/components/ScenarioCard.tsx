@@ -10,37 +10,42 @@ import defaultImage from "../assets/default-scenario.jpg"
 
 interface ScenarioCardProps {
   scenario: HandlerScenarioResponse;
+  isModerator?: boolean;
   onAddToTrip?: () => void;
 }
 
-export const ScenarioCard: FC<ScenarioCardProps> = ({ scenario, onAddToTrip }) => {
+export const ScenarioCard: FC<ScenarioCardProps> = ({ scenario, isModerator = false, onAddToTrip }) => {
   const dispatch = useAppDispatch();
   const { isAuthenticated } = useAppSelector((state) => state.user);
   const { loading } = useAppSelector((state) => state.scenarios);
 
   const handleAddToTrip = async () => {
-  if (!isAuthenticated) {
-    alert('Для добавления в заявку необходимо авторизоваться');
-    return;
-  }
-
-  try {
-    // Определить дефолтное значение по типу сценария
-    const defaultDuration = scenario.type === 'дорога' ? 100 : 1;
-    
-    await dispatch(addScenarioToTrip({
-      scenarioId: scenario.id!,
-      duration: defaultDuration  // ← Зависит от типа
-    })).unwrap();
-    dispatch(getDraftTrip());
-    if (onAddToTrip) {
-      onAddToTrip();
+    // Модераторам недоступно добавление в корзину
+    if (isModerator) {
+      return;
     }
-  } catch (error) {
-    alert('Ошибка при добавлении сценария в заявку');
-  }
-};
+    
+    if (!isAuthenticated) {
+      alert('Для добавления в заявку необходимо авторизоваться');
+      return;
+    }
 
+    try {
+      // Определить дефолтное значение по типу сценария
+      const defaultDuration = scenario.type === 'дорога' ? 100 : 1;
+      
+      await dispatch(addScenarioToTrip({
+        scenarioId: scenario.id!,
+        duration: defaultDuration  // ← Зависит от типа
+      })).unwrap();
+      dispatch(getDraftTrip());
+      if (onAddToTrip) {
+        onAddToTrip();
+      }
+    } catch (error) {
+      alert('Ошибка при добавлении сценария в заявку');
+    }
+  };
 
   return (
     <Card 
@@ -107,18 +112,18 @@ export const ScenarioCard: FC<ScenarioCardProps> = ({ scenario, onAddToTrip }) =
         </Card.Body>
       </Link>
       
-      {/* Кнопка добавления - всегда внизу без границы */}
+      {/* Кнопка добавления - для модератора просто disabled, как для гостя */}
       <div style={{ padding: '15px', paddingTop: '0' }}>
         <Button 
           style={{ 
             backgroundColor: '#3E6AE1', 
             borderColor: '#3E6AE1',
-            opacity: isAuthenticated ? 1 : 0.5,
-            cursor: isAuthenticated ? 'pointer' : 'not-allowed',
+            opacity: isAuthenticated && !isModerator ? 1 : 0.5,
+            cursor: isAuthenticated && !isModerator ? 'pointer' : 'not-allowed',
             width: '100%'
           }}
           onClick={handleAddToTrip}
-          disabled={!isAuthenticated || loading}
+          disabled={isModerator || !isAuthenticated || loading}
         >
           {loading ? 'Добавление...' : 'Добавить в поездку'}
         </Button>

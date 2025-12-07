@@ -163,13 +163,13 @@ export const TripsPage = () => {
             {user?.is_moderator && (
               <Col md={3}>
                 <Form.Group>
-                  <Form.Label>Создатель</Form.Label>
+                  <Form.Label>Водитель</Form.Label>
                   <Form.Select
                     value={creatorFilter}
                     onChange={(e) => setCreatorFilter(e.target.value)}
                     disabled={loading}
                   >
-                    <option value="">Все создатели</option>
+                    <option value="">Все водители</option>
                     {creators.map(creator => (
                       <option key={creator} value={creator}>
                         {creator}
@@ -224,7 +224,7 @@ export const TripsPage = () => {
           <div className={`trip-table-header d-none d-md-grid ${gridClass}`}>
             <div className="trip-header-item">ID</div>
             <div className="trip-header-item">Статус</div>
-            {user?.is_moderator && <div className="trip-header-item">Создатель</div>}
+            {user?.is_moderator && <div className="trip-header-item">Водитель</div>}
             <div className="trip-header-item">Нач. заряд</div>
             <div className="trip-header-item">Ост. заряд</div>
             <div className="trip-header-item">Создана</div>

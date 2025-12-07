@@ -20,14 +20,18 @@ export const ScenariosPage: FC = () => {
   const { scenarios, loading, error } = useAppSelector((state) => state.scenarios);
   const { cartCount, tripId } = useAppSelector((state) => state.draftTrip);
   const filters = useAppSelector((state) => state.filters);
-  const { isAuthenticated } = useAppSelector((state) => state.user);
+  const { isAuthenticated, user } = useAppSelector((state) => state.user);
+
+  // Определяем, является ли пользователь модератором
+  const isModerator = user?.is_moderator || false;
 
   useEffect(() => {
     loadScenarios();
-    if (isAuthenticated) {
+    // Модераторам не загружаем корзину
+    if (isAuthenticated && !isModerator) {
       dispatch(getDraftTrip());
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, isModerator]);
 
   const loadScenarios = () => {
     dispatch(getScenarios({ 
@@ -56,11 +60,17 @@ export const ScenariosPage: FC = () => {
   };
 
   const handleCartClick = () => {
+    // Модераторам недоступна корзина
+    if (isModerator) return;
+    
     if (cartCount > 0 && isAuthenticated && tripId) {
       // Используем tripId из draftTripSlice для навигации
       navigate(ROUTES.DRAFT_TRIP.replace(':tripId', tripId.toString()));
     }
   };
+
+  const displayCartCount = isModerator ? 0 : cartCount;
+  const cartDisabled = isModerator || !isAuthenticated || cartCount === 0 || !tripId;
 
   return (
     <Container fluid style={{ padding: 0 }}>
@@ -99,9 +109,9 @@ export const ScenariosPage: FC = () => {
           </div>
           
           <CartIcon 
-            count={cartCount} 
+            count={displayCartCount} 
             onClick={handleCartClick}
-            disabled={!isAuthenticated || cartCount === 0 || !tripId}
+            disabled={cartDisabled}
           />
         </div>
       </div>
@@ -123,10 +133,11 @@ export const ScenariosPage: FC = () => {
             <ScenarioCard 
               key={scenario.id} 
               scenario={scenario} 
+              isModerator={isModerator}
               onAddToTrip={() => {
                 loadScenarios();
-                // Обновляем корзину после добавления сценария
-                if (isAuthenticated) {
+                // Модераторам не обновляем корзину
+                if (isAuthenticated && !isModerator) {
                   dispatch(getDraftTrip());
                 }
               }}
